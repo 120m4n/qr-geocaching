@@ -4,18 +4,29 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	//"html/template"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
-	"golang.org/x/time/rate"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
+	"golang.org/x/time/rate"
 )
+
+type LogEntry struct {
+    Request *Request `json:"request"`
+    Capture *Capture `json:"capture"`
+}
+
+type TemplateData struct {
+    Title string
+    Logs  []LogEntry
+}
 
 type Capture struct {
 	ID        string `json:"id"`
@@ -71,21 +82,6 @@ func (i *IPRateLimiter) GetLimiter(ip string) *rate.Limiter {
     return limiter
 }
 
-func main() {
-	router := gin.Default()
-	v1 := router.Group("api/v1")
-    
-	// Crear un rate limiter que permite 1 solicitud por día
-    limiter := NewIPRateLimiter(rate.Limit(1.0/86400), 1) // 86400 segundos en un día
-
-    // Aplicar el middleware solo al endpoint /register
-    v1.GET("/register", RateLimitMiddleware(limiter), handleRegister)
-	v1.POST("/capture", handleCapture)
-	v1.GET("/logs", handleLogs)
-
-	router.Run(":3080")
-}
-
 func RateLimitMiddleware(limiter *IPRateLimiter) gin.HandlerFunc {
     return func(c *gin.Context) {
         ip := c.ClientIP()
@@ -100,101 +96,27 @@ func RateLimitMiddleware(limiter *IPRateLimiter) gin.HandlerFunc {
 }
 
 func handleRegister(c *gin.Context) {
-	logs, err := readLogs()
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error reading log file")
-		return
-	}
+    logs, err := readLogs()
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Error reading log file")
+        return
+    }
 
-	// Estilo CSS para los párrafos y el formulario
-	style := `
-	<style>
-		body {
-			font-family: Arial, sans-serif;
-			max-width: 800px;
-			margin: 0 auto;
-			padding: 20px;
-		}
-		.form-container {
-			background-color: #f9f9f9;
-			border: 1px solid #ddd;
-			border-radius: 5px;
-			padding: 20px;
-			margin-bottom: 20px;
-		}
-		input[type="text"] {
-			width: 100%;
-			padding: 10px;
-			margin-bottom: 10px;
-			border: 1px solid #ddd;
-			border-radius: 4px;
-		}
-		button {
-			background-color: #4CAF50;
-			color: white;
-			padding: 10px 15px;
-			border: none;
-			border-radius: 4px;
-			cursor: pointer;
-		}
-		button:hover {
-			background-color: #45a049;
-		}
-		.log-entry {
-			background-color: #f0f0f0;
-			border: 1px solid #ddd;
-			border-radius: 5px;
-			padding: 10px;
-			margin-bottom: 10px;
-		}
-	</style>
-	`
+    var logEntries []LogEntry
+    scanner := bufio.NewScanner(strings.NewReader(logs))
+    for scanner.Scan() {
+        var entry LogEntry
+        if err := json.Unmarshal(scanner.Bytes(), &entry); err == nil {
+            logEntries = append(logEntries, entry)
+        }
+    }
 
-	// Formulario HTML
-	form := `
-	<div class="form-container">
-		<h2>Register</h2>
-		<form hx-post="/api/v1/capture" hx-swap="outerHTML">
-			<input type="text" name="name" placeholder="Enter your name">
-			<button type="submit">Submit</button>
-		</form>
-	</div>
-	`
+    data := TemplateData{
+        Title: "Register",
+        Logs:  logEntries,
+    }
 
-	// Iniciar el contenido HTML
-	html := style + "<script src='https://unpkg.com/htmx.org@2.0.1'></script>" + form + "<h2>Logs</h2><div>"
-
-	// Procesar cada línea del log
-	scanner := bufio.NewScanner(strings.NewReader(logs))
-	for scanner.Scan() {
-		line := scanner.Text()
-		var logEntry struct {
-			Request *Request `json:"request"`
-			Capture *Capture `json:"capture"`
-		}
-		err := json.Unmarshal([]byte(line), &logEntry)
-		if err != nil {
-			continue
-		}
-
-		entryHTML := fmt.Sprintf(`
-			<div class="log-entry">
-				<strong>ID:</strong> %s<br>
-				<strong>Name:</strong> %s<br>
-				<strong>Capture At:</strong> %s<br>
-				<strong>Method:</strong> %s<br>
-				<strong>URI:</strong> %s
-			</div>
-		`, logEntry.Capture.ID, logEntry.Capture.Name, logEntry.Capture.CaptureAt, 
-		   logEntry.Request.Method, logEntry.Request.URI)
-
-		html += entryHTML
-	}
-
-	html += "</div>"
-
-	c.Header("Content-Type", "text/html")
-	c.String(http.StatusOK, html)
+    c.HTML(http.StatusOK, "layout.html", data)
 }
 
 func handleCapture(c *gin.Context) {
@@ -301,4 +223,28 @@ func readLogs() (string, error) {
 		return "", err
 	}
 	return string(bytes), nil
+}
+
+// var templates *template.Template
+
+
+// func init() {
+//     templates = template.Must(template.ParseGlob(filepath.Join("..", "assets", "templates", "*.html")))
+// }
+
+func main() {
+	router := gin.Default()
+	router.LoadHTMLGlob(filepath.Join("assets", "templates", "*"))
+	
+	v1 := router.Group("api/v1")
+    
+	// Crear un rate limiter que permite 1 solicitud por día
+    limiter := NewIPRateLimiter(rate.Limit(1.0/86400), 1) // 86400 segundos en un día
+
+    // Aplicar el middleware solo al endpoint /register
+    v1.GET("/register", RateLimitMiddleware(limiter), handleRegister)
+	v1.POST("/capture", handleCapture)
+	v1.GET("/logs", handleLogs)
+
+	router.Run(":3080")
 }

@@ -1,0 +1,22 @@
+{{define "content"}}
+<div class="form-container">
+    <h2>Register</h2>
+    <form hx-post="/api/v1/capture" hx-swap="outerHTML">
+        <input type="text" name="name" placeholder="Enter your name">
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+<h2>Logs</h2>
+<div>
+    {{range .Logs}}
+    <div class="log-entry">
+        <strong>ID:</strong> {{.Capture.ID}}<br>
+        <strong>Name:</strong> {{.Capture.Name}}<br>
+        <strong>Capture At:</strong> {{.Capture.CaptureAt}}<br>
+        <strong>Method:</strong> {{.Request.Method}}<br>
+        <strong>URI:</strong> {{.Request.URI}}
+    </div>
+    {{end}}
+</div>
+{{end}}

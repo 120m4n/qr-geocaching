@@ -5,3 +5,4 @@
 {"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"522c49ce-241b-4e30-95ec-12cb4478381f","name":"arepas","capture_at":"2024-07-27T15:56:25-05:00"}}
 {"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"e1d6a4ba-1e82-4217-a75b-81eb084d8320","name":"tonijas","capture_at":"2024-07-27T19:35:20-05:00"}}
 {"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"7502ecdc-1d3e-4055-b8f6-a7a948e3c723","name":"avelardo","capture_at":"2024-07-28T06:47:27-05:00"}}
+{"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"6a7a99aa-05c3-4353-8b1b-1f0fa6fc6370","name":"harry potter","capture_at":"2024-07-28T08:34:31-05:00"}}
