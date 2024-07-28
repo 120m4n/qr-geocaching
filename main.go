@@ -89,7 +89,11 @@ func RateLimitMiddleware(limiter *IPRateLimiter) gin.HandlerFunc {
         ip := c.ClientIP()
         limiter := limiter.GetLimiter(ip)
         if !limiter.Allow() {
-            c.String(http.StatusTooManyRequests, "Rate limit exceeded")
+            nextAllowedTime := time.Now().Add(24 * time.Hour)
+            c.HTML(http.StatusTooManyRequests, "rate_limit_exceeded.html", gin.H{
+                "Title": "Rate Limit Exceeded",
+                "NextAllowedTime": nextAllowedTime.Format("2006-01-02 15:04:05"),
+            })
             c.Abort()
             return
         }

@@ -8,3 +8,5 @@
 {"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"6a7a99aa-05c3-4353-8b1b-1f0fa6fc6370","name":"harry potter","capture_at":"2024-07-28T08:34:31-05:00"}}
 {"request":{"method":"POST","uri":"/api/v1/capture","real_ip":"::1","forwarded_ip":""},"capture":{"id":"9b88c47c-822f-49a7-9fbf-77ea59bf1b72","name":"telegram","capture_at":"2024-07-28T11:30:37-05:00"}}
 {"request":{"method":"POST","uri":"/api/v1/capture","real_ip":"152.203.27.233","forwarded_ip":"152.203.27.233"},"capture":{"id":"4b5151f6-39c0-4646-b8c1-568ec400bd3f","name":"ana sofia","capture_at":"2024-07-28T11:32:13-05:00"}}
+{"request":{"method":"POST","uri":"/api/v1/capture","real_ip":"::1","forwarded_ip":""},"capture":{"id":"a324326a-acc2-4983-8a2a-41897a1194be","name":"mac","capture_at":"2024-07-28T11:47:59-05:00"}}
+{"request":{"method":"POST","uri":"/api/v1/capture","real_ip":"::1","forwarded_ip":""},"capture":{"id":"7c32f695-b933-439f-8e63-9f9b9dad8086","name":"icloud","capture_at":"2024-07-28T12:14:02-05:00"}}
