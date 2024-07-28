@@ -1,0 +1,9 @@
+@server=http://localhost:3080/api/v1
+
+### get capture
+GET {{server}}/capture HTTP/1.1
+content-type: application/json
+
+
+### get logs
+GET {{server}}/logs HTTP/1.1

@@ -1,0 +1,6 @@
+{"request":{"method":"GET","uri":"/api/v1/capture"},"capture":{"id":"captured_id","name":"captured_name","capture_at":"captured_date"}}
+{"request":{"method":"GET","uri":"/api/v1/capture"},"capture":{"id":"captured_id","name":"captured_name","capture_at":"captured_date"}}
+{"request":{"method":"GET","uri":"/api/v1/capture"},"capture":{"id":"captured_id","name":"captured_name","capture_at":"captured_date"}}
+{"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"9b166e40-a279-4c62-8744-9f73d3c28252","name":"icloud","capture_at":"2024-07-27T15:50:01-05:00"}}
+{"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"522c49ce-241b-4e30-95ec-12cb4478381f","name":"arepas","capture_at":"2024-07-27T15:56:25-05:00"}}
+{"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"e1d6a4ba-1e82-4217-a75b-81eb084d8320","name":"tonijas","capture_at":"2024-07-27T19:35:20-05:00"}}
