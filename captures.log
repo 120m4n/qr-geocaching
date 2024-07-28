@@ -6,3 +6,5 @@
 {"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"e1d6a4ba-1e82-4217-a75b-81eb084d8320","name":"tonijas","capture_at":"2024-07-27T19:35:20-05:00"}}
 {"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"7502ecdc-1d3e-4055-b8f6-a7a948e3c723","name":"avelardo","capture_at":"2024-07-28T06:47:27-05:00"}}
 {"request":{"method":"POST","uri":"/api/v1/capture"},"capture":{"id":"6a7a99aa-05c3-4353-8b1b-1f0fa6fc6370","name":"harry potter","capture_at":"2024-07-28T08:34:31-05:00"}}
+{"request":{"method":"POST","uri":"/api/v1/capture","real_ip":"::1","forwarded_ip":""},"capture":{"id":"9b88c47c-822f-49a7-9fbf-77ea59bf1b72","name":"telegram","capture_at":"2024-07-28T11:30:37-05:00"}}
+{"request":{"method":"POST","uri":"/api/v1/capture","real_ip":"152.203.27.233","forwarded_ip":"152.203.27.233"},"capture":{"id":"4b5151f6-39c0-4646-b8c1-568ec400bd3f","name":"ana sofia","capture_at":"2024-07-28T11:32:13-05:00"}}

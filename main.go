@@ -35,8 +35,10 @@ type Capture struct {
 }
 
 type Request struct {
-	Method string `json:"method"`
-	URI    string `json:"uri"`
+    Method     string `json:"method"`
+    URI        string `json:"uri"`
+    RealIP     string `json:"real_ip"`
+    ForwardedIP string `json:"forwarded_ip"`
 }
 
 type IPRateLimiter struct {
@@ -127,7 +129,14 @@ func handleCapture(c *gin.Context) {
 		CaptureAt: time.Now().Format(time.RFC3339),
 	}
 
-	registerRequest(&Request{Method: c.Request.Method, URI: c.Request.URL.Path}, &capture)
+	request := Request{
+        Method:     c.Request.Method,
+        URI:        c.Request.URL.Path,
+        RealIP:     c.ClientIP(),
+        ForwardedIP: c.GetHeader("X-Forwarded-For"),
+    }
+
+	registerRequest(&request, &capture)
 	c.String(http.StatusOK, "Captura realizada con éxito")
 }
 
