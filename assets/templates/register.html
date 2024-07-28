@@ -1,22 +1,47 @@
 {{define "content"}}
-<div class="form-container">
+<div id="formContainer" class="form-container">
     <h2>Register</h2>
-    <form hx-post="/api/v1/capture" hx-swap="outerHTML">
-        <input type="text" name="name" placeholder="Enter your name">
+    <form id="registerForm" hx-post="/api/v1/capture" hx-target="#formContainer" hx-swap="outerHTML">
+        <input type="text" id="nameInput" name="name" placeholder="Enter your name" required>
         <button type="submit">Submit</button>
     </form>
 </div>
 
-<h2>Logs</h2>
-<div>
-    {{range .Logs}}
-    <div class="log-entry">
-        <strong>ID:</strong> {{.Capture.ID}}<br>
-        <strong>Name:</strong> {{.Capture.Name}}<br>
-        <strong>Capture At:</strong> {{.Capture.CaptureAt}}<br>
-        <strong>Real IP:</strong> {{.Request.RealIP}}<br>
-        <strong>Forwarded IP:</strong> {{.Request.ForwardedIP}}
-    </div>
-    {{end}}
-</div>
+<div id="errorMessage" style="display: none;" class="error-message"></div>
+
+<script>
+document.body.addEventListener('htmx:responseError', function(evt) {
+    if (evt.detail.xhr.status === 429) {
+        var errorDiv = document.getElementById('errorMessage');
+        errorDiv.innerHTML = evt.detail.xhr.responseText;
+        errorDiv.style.display = 'block';
+        
+        // Ocultar el formulario
+        document.getElementById('formContainer').style.display = 'none';
+        
+        // Prevenir el comportamiento por defecto de HTMX
+        evt.detail.shouldSwap = false;
+    }
+});
+
+document.getElementById('registerForm').addEventListener('htmx:beforeRequest', function(event) {
+    var nameInput = document.getElementById('nameInput');
+    if (nameInput.value.trim() === '') {
+        event.preventDefault();
+        alert('Please enter a name before submitting.');
+        nameInput.focus();
+    }
+});
+</script>
+
+<style>
+.error-message {
+    background-color: #ffcccc;
+    border: 1px solid #ff0000;
+    color: #ff0000;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+</style>
 {{end}}

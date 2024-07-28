@@ -46,17 +46,17 @@ type IPRateLimiter struct {
     mu  *sync.RWMutex
     r   rate.Limit
     b   int
+    firstHit map[string]bool
 }
 
 func NewIPRateLimiter(r rate.Limit, b int) *IPRateLimiter {
-    i := &IPRateLimiter{
+    return &IPRateLimiter{
         ips: make(map[string]*rate.Limiter),
         mu:  &sync.RWMutex{},
         r:   r,
         b:   b,
+        firstHit: make(map[string]bool),
     }
-
-    return i
 }
 
 func (i *IPRateLimiter) AddIP(ip string) *rate.Limiter {
@@ -70,25 +70,30 @@ func (i *IPRateLimiter) AddIP(ip string) *rate.Limiter {
     return limiter
 }
 
-func (i *IPRateLimiter) GetLimiter(ip string) *rate.Limiter {
+func (i *IPRateLimiter) GetLimiter(ip string) (*rate.Limiter, bool) {
     i.mu.Lock()
-    limiter, exists := i.ips[ip]
+    defer i.mu.Unlock()
 
+    limiter, exists := i.ips[ip]
     if !exists {
-        i.mu.Unlock()
-        return i.AddIP(ip)
+        limiter = rate.NewLimiter(i.r, i.b)
+        i.ips[ip] = limiter
     }
 
-    i.mu.Unlock()
+    firstHit := i.firstHit[ip]
+    if !firstHit {
+        i.firstHit[ip] = true
+        return limiter, false
+    }
 
-    return limiter
+    return limiter, true
 }
 
 func RateLimitMiddleware(limiter *IPRateLimiter) gin.HandlerFunc {
     return func(c *gin.Context) {
         ip := c.ClientIP()
-        limiter := limiter.GetLimiter(ip)
-        if !limiter.Allow() {
+        limiter, shouldLimit := limiter.GetLimiter(ip)
+        if shouldLimit && !limiter.Allow() {
             nextAllowedTime := time.Now().Add(24 * time.Hour)
             c.HTML(http.StatusTooManyRequests, "rate_limit_exceeded.html", gin.H{
                 "Title": "Rate Limit Exceeded",
@@ -238,12 +243,6 @@ func readLogs() (string, error) {
 	return string(bytes), nil
 }
 
-// var templates *template.Template
-
-
-// func init() {
-//     templates = template.Must(template.ParseGlob(filepath.Join("..", "assets", "templates", "*.html")))
-// }
 
 func main() {
 	router := gin.Default()
@@ -255,8 +254,8 @@ func main() {
     limiter := NewIPRateLimiter(rate.Limit(1.0/86400), 1) // 86400 segundos en un día
 
     // Aplicar el middleware solo al endpoint /register
-    v1.GET("/register", RateLimitMiddleware(limiter), handleRegister)
-	v1.POST("/capture", handleCapture)
+    v1.GET("/register", handleRegister)
+	v1.POST("/capture", RateLimitMiddleware(limiter), handleCapture)
 	v1.GET("/logs", handleLogs)
 
 	router.Run(":3080")
