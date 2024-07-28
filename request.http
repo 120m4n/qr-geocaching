@@ -1,6 +1,10 @@
 @server=http://localhost:3080/api/v1
 
 ### get capture
+GET {{server}}/register HTTP/1.1
+content-type: text/html
+
+### get capture
 GET {{server}}/capture HTTP/1.1
 content-type: application/json
 

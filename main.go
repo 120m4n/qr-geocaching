@@ -100,15 +100,101 @@ func RateLimitMiddleware(limiter *IPRateLimiter) gin.HandlerFunc {
 }
 
 func handleRegister(c *gin.Context) {
-	form := `
-	<script src="https://unpkg.com/htmx.org@2.0.1"></script>
-	<form hx-post="/api/v1/capture" hx-swap="outerHTML">
-		<input type="text" name="name" placeholder="Enter your name">
-		<button type="submit">Submit</button>
-	</form>
+	logs, err := readLogs()
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error reading log file")
+		return
+	}
+
+	// Estilo CSS para los párrafos y el formulario
+	style := `
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+		.form-container {
+			background-color: #f9f9f9;
+			border: 1px solid #ddd;
+			border-radius: 5px;
+			padding: 20px;
+			margin-bottom: 20px;
+		}
+		input[type="text"] {
+			width: 100%;
+			padding: 10px;
+			margin-bottom: 10px;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+		}
+		button {
+			background-color: #4CAF50;
+			color: white;
+			padding: 10px 15px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+		button:hover {
+			background-color: #45a049;
+		}
+		.log-entry {
+			background-color: #f0f0f0;
+			border: 1px solid #ddd;
+			border-radius: 5px;
+			padding: 10px;
+			margin-bottom: 10px;
+		}
+	</style>
 	`
+
+	// Formulario HTML
+	form := `
+	<div class="form-container">
+		<h2>Register</h2>
+		<form hx-post="/api/v1/capture" hx-swap="outerHTML">
+			<input type="text" name="name" placeholder="Enter your name">
+			<button type="submit">Submit</button>
+		</form>
+	</div>
+	`
+
+	// Iniciar el contenido HTML
+	html := style + "<script src='https://unpkg.com/htmx.org@2.0.1'></script>" + form + "<h2>Logs</h2><div>"
+
+	// Procesar cada línea del log
+	scanner := bufio.NewScanner(strings.NewReader(logs))
+	for scanner.Scan() {
+		line := scanner.Text()
+		var logEntry struct {
+			Request *Request `json:"request"`
+			Capture *Capture `json:"capture"`
+		}
+		err := json.Unmarshal([]byte(line), &logEntry)
+		if err != nil {
+			continue
+		}
+
+		entryHTML := fmt.Sprintf(`
+			<div class="log-entry">
+				<strong>ID:</strong> %s<br>
+				<strong>Name:</strong> %s<br>
+				<strong>Capture At:</strong> %s<br>
+				<strong>Method:</strong> %s<br>
+				<strong>URI:</strong> %s
+			</div>
+		`, logEntry.Capture.ID, logEntry.Capture.Name, logEntry.Capture.CaptureAt, 
+		   logEntry.Request.Method, logEntry.Request.URI)
+
+		html += entryHTML
+	}
+
+	html += "</div>"
+
 	c.Header("Content-Type", "text/html")
-	c.String(http.StatusOK, form)
+	c.String(http.StatusOK, html)
 }
 
 func handleCapture(c *gin.Context) {

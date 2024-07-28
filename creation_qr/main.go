@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// Creamos un nuevo QR
-	qrc, err := qrcode.New("https://6942-152-203-27-233.ngrok-free.app/api/v1/register")
+	qrc, err := qrcode.New("https://7b05-152-203-27-233.ngrok-free.app/api/v1/register")
 	if err != nil {
 		fmt.Printf("could not generate QRCode: %v", err)
 		return
