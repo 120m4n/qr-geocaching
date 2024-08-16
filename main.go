@@ -254,7 +254,7 @@ func main() {
     limiter := NewIPRateLimiter(rate.Limit(1.0/86400), 1) // 86400 segundos en un día
 
     // Aplicar el middleware solo al endpoint /register
-    v1.GET("/register", handleRegister)
+    v1.GET("/register", RateLimitMiddleware(limiter), handleRegister)
 	v1.POST("/capture", RateLimitMiddleware(limiter), handleCapture)
 	v1.GET("/logs", handleLogs)
 

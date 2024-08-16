@@ -9,6 +9,18 @@
 
 <div id="errorMessage" style="display: none;" class="error-message"></div>
 
+<h2>Logs</h2>
+<div>
+    {{range .Logs}}
+    <div class="log-entry">
+        <strong>ID:</strong> {{.Capture.ID}}<br>
+        <strong>Name:</strong> {{.Capture.Name}}<br>
+        <strong>Capture At:</strong> {{.Capture.CaptureAt}}<br>
+        <strong>Real IP:</strong> {{.Request.RealIP}}<br>
+        <strong>Forwarded IP:</strong> {{.Request.ForwardedIP}}
+    </div>
+    {{end}}
+
 <script>
 document.body.addEventListener('htmx:responseError', function(evt) {
     if (evt.detail.xhr.status === 429) {
