@@ -1,11 +1,14 @@
 {{define "content"}}
 <div id="formContainer" class="form-container">
     <h2>Register</h2>
-    <form id="registerForm" hx-post="/api/v1/capture" hx-target="#formContainer" hx-swap="outerHTML">
+    <form id="registerForm" hx-post="/api/v1/capture?geocache={{.Geocache}}" hx-target="#formContainer" hx-swap="outerHTML">
         <input type="text" id="nameInput" name="name" placeholder="Enter your name" required>
         <button type="submit">Submit</button>
     </form>
 </div>
+<h2>
+    Geocache: {{.Geocache}}
+</h2>
 
 <div id="errorMessage" style="display: none;" class="error-message"></div>
 
@@ -16,8 +19,6 @@
         <strong>ID:</strong> {{.Capture.ID}}<br>
         <strong>Name:</strong> {{.Capture.Name}}<br>
         <strong>Capture At:</strong> {{.Capture.CaptureAt}}<br>
-        <strong>Real IP:</strong> {{.Request.RealIP}}<br>
-        <strong>Forwarded IP:</strong> {{.Request.ForwardedIP}}
     </div>
     {{end}}
 

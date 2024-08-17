@@ -26,6 +26,7 @@ type LogEntry struct {
 type TemplateData struct {
     Title string
     Logs  []LogEntry
+	Geocache string
 }
 
 type Capture struct {
@@ -107,7 +108,8 @@ func RateLimitMiddleware(limiter *IPRateLimiter) gin.HandlerFunc {
 }
 
 func handleRegister(c *gin.Context) {
-    logs, err := readLogs()
+	geocacheName := c.DefaultQuery("geocache", "Guest")
+    logs, err := readLogs(geocacheName)
     if err != nil {
         c.String(http.StatusInternalServerError, "Error reading log file")
         return
@@ -125,12 +127,14 @@ func handleRegister(c *gin.Context) {
     data := TemplateData{
         Title: "Register",
         Logs:  logEntries,
+		Geocache: geocacheName,
     }
 
     c.HTML(http.StatusOK, "layout.html", data)
 }
 
 func handleCapture(c *gin.Context) {
+	geocacheName := c.DefaultQuery("geocache", "Guest")
 	name := c.PostForm("name")
 	capture := Capture{
 		ID:        uuid.New().String(), // Genera un UUID v7
@@ -145,12 +149,13 @@ func handleCapture(c *gin.Context) {
         ForwardedIP: c.GetHeader("X-Forwarded-For"),
     }
 
-	registerRequest(&request, &capture)
+	registerRequest(geocacheName, &request, &capture)
 	c.String(http.StatusOK, "Captura realizada con éxito")
 }
 
 func handleLogs(c *gin.Context) {
-	logs, err := readLogs()
+	geocacheName := c.DefaultQuery("geocache", "Guest")
+	logs, err := readLogs(geocacheName)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error reading log file")
 		return
@@ -193,11 +198,8 @@ func handleLogs(c *gin.Context) {
 				<strong>ID:</strong> %s<br>
 				<strong>Name:</strong> %s<br>
 				<strong>Capture At:</strong> %s<br>
-				<strong>Method:</strong> %s<br>
-				<strong>URI:</strong> %s
 			</p>
-		`, logEntry.Capture.ID, logEntry.Capture.Name, logEntry.Capture.CaptureAt, 
-		   logEntry.Request.Method, logEntry.Request.URI)
+		`, logEntry.Capture.ID, logEntry.Capture.Name, logEntry.Capture.CaptureAt)
 
 		html += entryHTML
 	}
@@ -210,8 +212,18 @@ func handleLogs(c *gin.Context) {
 }
 
 
-func registerRequest(req *Request, capture *Capture) {
-	f, err := os.OpenFile("captures.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+func registerRequest(filename string, req *Request, capture *Capture) {
+	// check if filename exist or create it
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		file, err := os.Create(filename)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer file.Close()
+	}
+
+	f, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -229,8 +241,16 @@ func registerRequest(req *Request, capture *Capture) {
 	fmt.Fprintln(f, string(jsonData))
 }
 
-func readLogs() (string, error) {
-	f, err := os.OpenFile("captures.log", os.O_RDONLY, 0666)
+func readLogs(filename  string) (string, error) {
+	// check if filename exist or create it
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		file, err := os.Create(filename)
+		if err != nil {
+			return "", err
+		}
+		defer file.Close()
+	}
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0666)
 	if err != nil {
 		return "", err
 	}
@@ -251,7 +271,7 @@ func main() {
 	v1 := router.Group("api/v1")
     
 	// Crear un rate limiter que permite 1 solicitud por día
-    limiter := NewIPRateLimiter(rate.Limit(1.0/86400), 1) // 86400 segundos en un día
+    limiter := NewIPRateLimiter(rate.Limit(1.0/86400), 2) // 86400 segundos en un día
 
     // Aplicar el middleware solo al endpoint /register
     v1.GET("/register", RateLimitMiddleware(limiter), handleRegister)
