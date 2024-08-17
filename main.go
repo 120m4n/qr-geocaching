@@ -271,7 +271,7 @@ func main() {
 	v1 := router.Group("api/v1")
     
 	// Crear un rate limiter que permite 1 solicitud por día
-    limiter := NewIPRateLimiter(rate.Limit(1.0/86400), 2) // 86400 segundos en un día
+    limiter := NewIPRateLimiter(rate.Limit(1.0/86400), 3) // 86400 segundos en un día
 
     // Aplicar el middleware solo al endpoint /register
     v1.GET("/register", RateLimitMiddleware(limiter), handleRegister)

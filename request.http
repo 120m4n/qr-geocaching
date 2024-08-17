@@ -1,7 +1,7 @@
 @server=http://localhost:3080/api/v1
 
 ### get capture
-GET {{server}}/register?geocache=test HTTP/1.1
+GET {{server}}/register?geocache=meson HTTP/1.1
 content-type: text/html
 
 ### get capture
