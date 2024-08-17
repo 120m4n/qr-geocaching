@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  geocache_api:
+    image: geocaching:v1
+    restart: unless-stopped
+    environment:
+      - GIN_MODE=release
+    ports:
+      - '127.0.0.1:3080:3080'
+networks:
+  default:
+    external: true
+    name: scoobydoo
