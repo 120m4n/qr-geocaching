@@ -12,7 +12,7 @@
 
 <div id="errorMessage" style="display: none;" class="error-message"></div>
 
-<h2>Logs</h2>
+<h2 id="logs-title" class="logs-title">Logs</h2>
 <div>
     {{range .Logs}}
     <div class="log-entry">
@@ -45,6 +45,19 @@ document.getElementById('registerForm').addEventListener('htmx:beforeRequest', f
         nameInput.focus();
     }
 });
+</script>
+
+<script defer>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Obtener el elemento del título
+        var logsTitle = document.getElementById("logs-title");
+        let log_entries = document.querySelectorAll(".log-entry");
+        if (log_entries.length > 0) {
+            logsTitle.style.display = "block";
+        } else {
+            logsTitle.style.display = "none";
+        }
+    })
 </script>
 
 <style>

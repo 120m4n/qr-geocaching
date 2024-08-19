@@ -150,7 +150,7 @@ func handleCapture(c *gin.Context) {
     }
 
 	registerRequest(geocacheName, &request, &capture)
-	c.String(http.StatusOK, "Captura realizada con éxito")
+	c.String(http.StatusOK, "Successful capture")
 }
 
 func handleLogs(c *gin.Context) {
@@ -267,7 +267,15 @@ func readLogs(filename  string) (string, error) {
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob(filepath.Join("assets", "templates", "*"))
-	
+	router.StaticFile("/favicon.ico", filepath.Join("assets","resources","favicon.ico"))
+	router.StaticFile("/logo_380.webp", filepath.Join("assets","resources","logo_380.webp"))
+
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "Geocaching",
+		})
+	})
+
 	v1 := router.Group("api/v1")
     
 	// Crear un rate limiter que permite 1 solicitud por día

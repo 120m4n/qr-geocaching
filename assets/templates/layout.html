@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script src="https://unpkg.com/htmx.org@2.0.1"></script>
     <style>
         body {
@@ -20,7 +21,7 @@
             margin-bottom: 20px;
         }
         input[type="text"] {
-            width: 100%;
+            /* width: 100%; */
             padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ddd;
@@ -47,6 +48,7 @@
     </style>
 </head>
 <body>
+    <img src="/logo_380.webp" alt="WebP logo." width="64" height="64">
     {{template "content" .}}
 </body>
 </html>
